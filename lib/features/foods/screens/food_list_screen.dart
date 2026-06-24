@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/food_item.dart';
 import '../widgets/food_card.dart';
+import 'insert_food_screen.dart';
 
 class FoodListScreen extends StatelessWidget {
   const FoodListScreen({super.key});
@@ -78,7 +79,11 @@ class FoodListScreen extends StatelessWidget {
             backgroundColor: colorScheme.tertiaryContainer,
             foregroundColor: colorScheme.onTertiaryContainer,
             onPressed: () {
-              // TODO: Navigate to add food screen.
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const InsertFoodScreen(),
+                ),
+              );
             },
             child: const Icon(Icons.add),
           );
