@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:food_expiration_dates/data/local/app_database.dart';
 
 import '../models/food_item.dart';
 import '../widgets/food_card.dart';
 import 'insert_food_screen.dart';
 
 class FoodListScreen extends StatelessWidget {
-  const FoodListScreen({super.key});
+  const FoodListScreen({
+    required this.database,
+    super.key,
+  });
 
-  static final List<FoodItem> _items = [
+  final AppDatabase database;
+
+  /*static final List<FoodItem> _items = [
     FoodItem(
         foodName: 'Eggs',
         expirationDate: DateTime.now().add(const Duration(days: -1)),
@@ -32,7 +38,7 @@ class FoodListScreen extends StatelessWidget {
     FoodItem(
         foodName: 'Tomatoes',
         expirationDate: DateTime.now().add(const Duration(days: 30))),
-  ];
+  ];*/
 
   @override
   Widget build(BuildContext context) {
@@ -40,36 +46,65 @@ class FoodListScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            title: Text(
-              'Food Expiration Dates',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: colorScheme.primary,
+      body: StreamBuilder<List<Food>>(
+        stream: database.watchFoods(),
+        builder: (context, snapshot) {
+          final items = snapshot.data ?? [];
+
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar.large(
+                title: Text(
+                  'Food Expiration Dates',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: colorScheme.primary,
+                  ),
+                ),
               ),
-            ),
-          ),
-          if (_items.isEmpty)
-            const SliverFillRemaining(
-              child: EmptyFoodList(),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.all(8),
-              sliver: SliverList.separated(
-                itemCount: _items.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 0),
-                itemBuilder: (context, index) {
-                  return FoodCard(
-                    item: _items[index],
-                    onTapEdit: () {},
-                    onTapDelete: () {},
-                  );
-                },
-              ),
-            ),
-        ],
+              if (items.isEmpty)
+                const SliverFillRemaining(
+                  child: EmptyFoodList(),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.all(8),
+                  sliver: SliverList.separated(
+                    itemCount: items.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 0),
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final foodItem = FoodItem(
+                        id: item.id,
+                        foodName: item.foodName,
+                        expirationDate: item.expirationDate,
+                        openingDate: item.openingDate,
+                        timeSpanDays: item.timeSpanDays,
+                        quantity: item.quantity,
+                      );
+
+                      return FoodCard(
+                        item: foodItem,
+                        onTapEdit: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => InsertFoodScreen(
+                                database: database,
+                                itemToEdit: foodItem,
+                              ),
+                            ),
+                          );
+                        },
+                        onTapDelete: () {
+                          database.deleteFoodById(item.id);
+                        },
+                      );
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
       ),
       floatingActionButton: Builder(
         builder: (context) {
@@ -81,7 +116,7 @@ class FoodListScreen extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const InsertFoodScreen(),
+                  builder: (context) => InsertFoodScreen(database: database),
                 ),
               );
             },

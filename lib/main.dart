@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:food_expiration_dates/data/local/app_database.dart';
 
 import 'features/foods/screens/food_list_screen.dart';
 
 void main() {
-  runApp(const FoodExpirationDatesApp());
+  final database = AppDatabase();
+
+  runApp(FoodExpirationDatesApp(
+    database: database,
+  ));
 }
 
 class FoodExpirationDatesApp extends StatelessWidget {
-  const FoodExpirationDatesApp({super.key});
+  const FoodExpirationDatesApp({
+    required this.database,
+    super.key,
+  });
+
+  final AppDatabase database;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +29,7 @@ class FoodExpirationDatesApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const FoodListScreen(),
+      home: FoodListScreen(database: database),
     );
   }
 }

@@ -1,5 +1,6 @@
 class FoodItem {
   const FoodItem({
+    this.id,
     required this.foodName,
     required this.expirationDate,
     this.openingDate,
@@ -7,6 +8,7 @@ class FoodItem {
     this.quantity = 1,
   });
 
+  final int? id;
   final String foodName;
   final DateTime expirationDate;
   final DateTime? openingDate;
